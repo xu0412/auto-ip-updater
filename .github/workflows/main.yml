@@ -1,0 +1,44 @@
+# 工作流名称
+name: Daily IP List Updater
+
+# 触发条件
+on:
+  # 每天在国际标准时间 02:00 (北京时间 10:00) 运行
+  schedule:
+    - cron: '0 2 * * *'
+  # 允许手动在GitHub页面上触发
+  workflow_dispatch:
+
+# 任务
+jobs:
+  build:
+    # 运行环境
+    runs-on: ubuntu-latest
+
+    steps:
+    # 步骤1: 检出代码
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 步骤2: 设置Python环境
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11' # 指定Python版本
+
+    # 步骤3: 安装依赖
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # 步骤4: 运行更新脚本
+    - name: Run IP update script
+      run: python update_ips.py
+
+    # 步骤5: 如果有更改，则提交并推送
+    - name: Commit and push if changed
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto-update IP list"
+        file_pattern: 'ip_list.txt' # 只提交这个文件
