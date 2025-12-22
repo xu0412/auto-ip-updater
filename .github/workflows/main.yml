@@ -1,11 +1,11 @@
-# 工作流名称
-name: Daily IP List Updater
+# 工作流程名称
+name: Hourly IP List Updater
 
 # 触发条件
 on:
-  # 每天在国际标准时间 02:00 (北京时间 10:00) 运行
+  # 每小时的第0分钟运行一次
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 * * * *'
   # 允许手动在GitHub页面上触发
   workflow_dispatch:
 
@@ -18,11 +18,11 @@ jobs:
     steps:
     # 步骤1: 检出代码
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # 步骤2: 设置Python环境
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11' # 指定Python版本
 
@@ -36,9 +36,14 @@ jobs:
     - name: Run IP update script
       run: python update_ips.py
 
-    # 步骤5: 如果有更改，则提交并推送
+    # 步骤5: 打印生成的内容到日志
+    - name: Show generated IP list
+      run: cat ip_list.txt
+
+    # 步骤6: 如果有更改，则提交并推送
     - name: Commit and push if changed
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "Auto-update IP list"
-        file_pattern: 'ip_list.txt' # 只提交这个文件
+        file_pattern: 'ip_list.txt'
+
